@@ -3,20 +3,21 @@ import itertools
 import pathlib
 import sys
 import typing as tp
-
+import string
 import morpholog
 import tqdm
-#import nltk
 
 MORPH_ENGINE = morpholog.Morpholog()
+
+def clear_words(words: tp.List[str]) -> tp.List[str]:
+    return [i.lower().translate(str.maketrans("", "", string.punctuation)) for i in words if i not in [" ", ""] and i.strip() not in string.punctuation]
 
 
 def load_words(path: pathlib.Path) -> tp.Set["str"]:
     with open(path, "r", encoding="utf-8") as text_file:
         # not supporting anything other than utf-8 for now
         text = text_file.read()
-    # TODO: stemming (ntlk or scratch?)
-    words = text.split()
+    words = clear_words(text.split())
     return set(words)
 
 
@@ -31,6 +32,8 @@ def create_morphs(words: tp.Set["str"]) -> tp.Set["str"]:
 def syntheticity_index(words: tp.Set["str"], morphs: tp.Set["str"]) -> float:
     if not words:
         raise ValueError("Empty text.")
+    #print(len(morphs))
+    #print(len(words))
     index = len(morphs) / len(words)
     if index < 1.0:
         raise ValueError("Syntheticity index less than 1. Malformed text?")
@@ -59,6 +62,8 @@ if __name__ == "__main__":
         print("No text found.", file=sys.stderr)
         sys.exit(1)
     morphs = create_morphs(words)
+    #print(morphs)
+    #print(words)
     try:
         syn_index = syntheticity_index(words, morphs)
     except ValueError as e:
