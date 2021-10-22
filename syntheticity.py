@@ -1,16 +1,22 @@
 import argparse
 import itertools
 import pathlib
+import string
 import sys
 import typing as tp
-import string
+
 import morpholog
 import tqdm
 
 MORPH_ENGINE = morpholog.Morpholog()
 
+
 def clear_words(words: tp.List[str]) -> tp.List[str]:
-    return [i.lower().translate(str.maketrans("", "", string.punctuation)) for i in words if i not in [" ", ""] and i.strip() not in string.punctuation]
+    return [
+        i.lower().translate(str.maketrans("", "", string.punctuation))
+        for i in words
+        if i not in [" ", ""] and i.strip() not in string.punctuation
+    ]
 
 
 def load_words(path: pathlib.Path) -> tp.Set["str"]:
