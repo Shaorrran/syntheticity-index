@@ -1,22 +1,29 @@
 import argparse
 import itertools
 import pathlib
+import string
 import sys
 import typing as tp
 
 import morpholog
 import tqdm
-#import nltk
 
 MORPH_ENGINE = morpholog.Morpholog()
+
+
+def clear_words(words: tp.List[str]) -> tp.List[str]:
+    return [
+        i.lower().translate(str.maketrans("", "", string.punctuation))
+        for i in words
+        if i not in [" ", ""] and i.strip() not in string.punctuation
+    ]
 
 
 def load_words(path: pathlib.Path) -> tp.Set["str"]:
     with open(path, "r", encoding="utf-8") as text_file:
         # not supporting anything other than utf-8 for now
         text = text_file.read()
-    # TODO: stemming (ntlk or scratch?)
-    words = text.split()
+    words = clear_words(text.split())
     return set(words)
 
 
