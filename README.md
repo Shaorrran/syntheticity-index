@@ -5,7 +5,6 @@
 
 ## Usage
 `python syntheticity.py --file filename.txt`
-(Argument not usable for now, will read `test.txt` from the project rootdir.)
 
 ## Technical details
 Syntheticity index is the ratio of morphs in given language (or text) to the number of words in that language (or text).
