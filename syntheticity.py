@@ -32,8 +32,6 @@ def create_morphs(words: tp.Set["str"]) -> tp.Set["str"]:
 def syntheticity_index(words: tp.Set["str"], morphs: tp.Set["str"]) -> float:
     if not words:
         raise ValueError("Empty text.")
-    #print(len(morphs))
-    #print(len(words))
     index = len(morphs) / len(words)
     if index < 1.0:
         raise ValueError("Syntheticity index less than 1. Malformed text?")
@@ -62,8 +60,6 @@ if __name__ == "__main__":
         print("No text found.", file=sys.stderr)
         sys.exit(1)
     morphs = create_morphs(words)
-    #print(morphs)
-    #print(words)
     try:
         syn_index = syntheticity_index(words, morphs)
     except ValueError as e:
