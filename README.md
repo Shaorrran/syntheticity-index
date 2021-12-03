@@ -1,4 +1,4 @@
-# Syntheticity index for texts (in Russian only)
+# Syntheticity index for texts (supports Russian and English)
 
 ## Requirements
 `pip install -r requirements.txt` (mostly depends on [Morpholog](https://github.com/constantin50/morpholog))
