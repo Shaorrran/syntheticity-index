@@ -9,6 +9,9 @@ MODELS_PATH = f"{os.path.dirname(os.path.realpath(__file__))}{os.sep}models"
 os.environ["POLYGLOT_DATA_PATH"] = MODELS_PATH
 # point Polyglot to models stored in the module folder
 
+from socket import gaierror as GAIError
+from urllib.error import URLError
+
 import polyglot
 import polyglot.downloader
 import polyglot.text
@@ -54,7 +57,7 @@ class LinguisticIndices:
         if not self.language:
             # autodetect
             self.language = self.text_object.language.code
-        self.words = {i for i in self.text_object.words}
+        self.words = set(self.text_object.words)
 
     def _tokenize_into_morphs(self) -> None:
         morphs = []
@@ -64,7 +67,7 @@ class LinguisticIndices:
             # autodetect
             self.language = self.text_object.language.code
         if not self.check_corpora_availability():
-            self.download_corpora()
+            self._download_corpora()
         if not self.words:
             self._tokenize_into_words()
         for i in tqdm.tqdm(self.words, disable=not self.progress):
@@ -84,15 +87,25 @@ class LinguisticIndices:
     def check_corpora_availability(self) -> bool:
         if not self.language:
             raise ValueError("Language not set.")
-        return bool(
-            self.downloader.status(f"morph2.{self.language}")
-            == self.downloader.INSTALLED
-        )
+        try:
+            return bool(
+                self.downloader.status(f"morph2.{self.language}")
+                == self.downloader.INSTALLED
+            )
+        except (URLError, GAIError) as e:
+            print("Hostname resolution failed, checking local models storage manually.")
+            return os.path.exists(
+                f"{os.path.dirname(os.path.realpath(__file__))}{os.sep}models{os.sep}polyglot_data{os.sep}{self.language}{os.sep}{self.language}.morph.tar.bz2"
+            )
 
-    def download_corpora(self) -> None:
+    def _download_corpora(self) -> None:
         if not self.language:
             raise ValueError("Language not set.")
-        self.downloader.download(f"morph2.{self.language}")
+        try:
+            self.downloader.download(f"morph2.{self.language}")
+        except (URLError, GAIError) as e:
+            print("Corpora download failed, aborting.")
+            raise e
 
     @property
     def language_code(self) -> str:
@@ -105,7 +118,7 @@ class LinguisticIndices:
         if not code:
             if not self.text_object:
                 raise ValueError(
-                    "Text required for automatic language detected, but is not loaded yet."
+                    "Text required for automatic language detection, but is not loaded yet."
                 )
             self.language = self.text_object.language.code
         else:
